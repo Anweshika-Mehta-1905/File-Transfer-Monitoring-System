@@ -1,0 +1,7 @@
+   .venv/
+   __pycache__/
+   *.pyc
+   audit_events.jsonl
+   security_audit.log
+   sensitive_baseline.json
+   security_report.txt
