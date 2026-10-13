@@ -1,0 +1,18 @@
+{
+  "sensitive_dirs": ["~/dlp_lab/sensitive"],
+  "approved_destinations": ["~/dlp_lab/approved"],
+  "watch_dirs": ["~/dlp_lab/approved", "~/dlp_lab/usb_sim", "~/dlp_lab/downloads", "~/dlp_lab/work"],
+  "removable_media_roots": ["/media", "/run/media", "/Volumes", "E:\\", "F:\\", "~/dlp_lab/usb_sim"],
+  "network_share_roots": ["\\\\"],
+  "download_dirs": ["~/dlp_lab/downloads"],
+  "upload_staging_dirs": [],
+  "ignore_patterns": ["~$*", "*.swp", "*.swx", ".~lock.*#", ".DS_Store"],
+  "log_file": "security_audit.log",
+  "event_log_jsonl": "audit_events.jsonl",
+  "baseline_file": "sensitive_baseline.json",
+  "report_file": "security_report.txt",
+  "log_all_events": true,
+  "sensitive_modification_severity": "HIGH",
+  "move_correlation_seconds": 15,
+  "stability_interval_seconds": 0.5
+}

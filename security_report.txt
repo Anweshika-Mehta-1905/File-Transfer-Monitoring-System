@@ -1,0 +1,63 @@
+==============================================================================
+DLP SECURITY AUDIT REPORT
+==============================================================================
+Generated : 2026-10-13T04:16:49.865539+00:00
+Period    : 2026-10-13T04:04:55.126202+00:00  ->  2026-10-13T04:16:49.864934+00:00
+Events    : 22
+
+Events by severity:
+  CRITICAL 5
+  HIGH     1
+  WARNING  0
+  INFO     16
+
+Events by type:
+  WATCH_STARTED             10
+  UNAUTHORIZED_COPY         3
+  MONITOR_STARTED           2
+  MONITOR_STOPPED           2
+  BASELINE_ADDED            1
+  AUTHORIZED_COPY           1
+  INTEGRITY_FAILURE         1
+  SENSITIVE_FILE_MODIFIED   1
+  MOVE_CORRELATED           1
+
+High-severity alerts (6):
+------------------------------------------------------------------------------
+[2026-10-13T04:07:42.096091+00:00] CRITICAL UNAUTHORIZED_COPY
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    dst           : /home/admin123/dlp_lab/usb_sim/payroll.csv
+    dest_type     : REMOVABLE_MEDIA
+    sha256_before : edc00cea67ed48a3e7eff81141df481058d61dcfedb2a2bfade67b1e678a006b
+    sha256_after  : edc00cea67ed48a3e7eff81141df481058d61dcfedb2a2bfade67b1e678a006b
+    policy        : sensitive file sent to a destination not in approved_destinations
+[2026-10-13T04:07:51.496052+00:00] CRITICAL INTEGRITY_FAILURE
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    dst           : /home/admin123/dlp_lab/work/payroll.csv
+    sha256_before : edc00cea67ed48a3e7eff81141df481058d61dcfedb2a2bfade67b1e678a006b
+    sha256_after  : e3d0c4e33d980688ffdf37e7a5070761be05bc3fdb3a1e0555256d7baf1992c9
+    note          : hash mismatch after transfer - corrupted, truncated or tampered
+[2026-10-13T04:07:51.496197+00:00] CRITICAL UNAUTHORIZED_COPY
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    dst           : /home/admin123/dlp_lab/work/payroll.csv
+    dest_type     : LOCAL_DISK
+    sha256_before : edc00cea67ed48a3e7eff81141df481058d61dcfedb2a2bfade67b1e678a006b
+    sha256_after  : e3d0c4e33d980688ffdf37e7a5070761be05bc3fdb3a1e0555256d7baf1992c9
+    policy        : sensitive file sent to a destination not in approved_destinations
+[2026-10-13T04:07:57.493260+00:00] HIGH SENSITIVE_FILE_MODIFIED
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    sha256_before : edc00cea67ed48a3e7eff81141df481058d61dcfedb2a2bfade67b1e678a006b
+    sha256_after  : 9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c
+    note          : content changed - possible tampering
+[2026-10-13T04:08:07.209412+00:00] CRITICAL UNAUTHORIZED_COPY
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    dst           : /home/admin123/dlp_lab/work/notes.txt
+    dest_type     : LOCAL_DISK
+    sha256_before : 9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c
+    sha256_after  : 9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c
+    policy        : sensitive file sent to a destination not in approved_destinations
+[2026-10-13T04:08:07.212772+00:00] CRITICAL MOVE_CORRELATED
+    src           : /home/admin123/dlp_lab/sensitive/payroll.csv
+    dst           : /home/admin123/dlp_lab/work/notes.txt
+    sha256_before : 9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c
+    note          : copy followed by deletion of original = MOVE
