@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DLP Monitor Dashboard</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a212b; --text:#e6e9ee; --muted:#8b95a5; --line:#2a3340; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 system-ui,sans-serif; }
+  header { padding:16px 20px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:18px; margin:0; flex:1; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; padding:16px 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  .card b { display:block; font-size:26px; }
+  .CRITICAL { color:#ff5c5c; } .HIGH { color:#ff9f43; } .WARNING { color:#f5d547; } .INFO { color:#5cc8ff; }
+  select, button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 10px; }
+  .wrap { padding:0 20px 24px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; min-width:900px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; position:sticky; top:0; background:var(--bg); }
+  td.path { font-family:ui-monospace,monospace; font-size:12px; word-break:break-all; }
+  tr.alert { background:rgba(255,92,92,.07); }
+  .sev { font-weight:700; } .muted { color:var(--muted); font-size:12px; }
+</style></head><body>
+<header>
+  <h1>DLP Monitor - Demo (sample data, not a live system)</h1>
+  <label class="muted">Severity
+    <select id="filter"><option value="">All</option><option>CRITICAL</option><option>HIGH</option>
+    <option>WARNING</option><option>INFO</option></select></label>
+  <span class="muted" id="status">connecting...</span>
+</header>
+<div class="cards" id="cards"></div>
+<div class="wrap"><table><thead><tr>
+  <th>Time (UTC)</th><th>Severity</th><th>Event</th><th>Source</th><th>Destination</th><th>Details</th>
+</tr></thead><tbody id="rows"></tbody></table></div>
+<script>
+const DATA = {"counts": {"CRITICAL": 5, "HIGH": 1, "INFO": 7}, "events": [{"timestamp": "2026-10-13T09:05:00+00:00", "severity": "CRITICAL", "event_type": "MOVE_CORRELATED", "src": "/srv/finance/sensitive/payroll.csv", "dst": "/home/analyst/work/notes.txt", "note": "copy followed by deletion of original = MOVE"}, {"timestamp": "2026-10-13T09:05:00+00:00", "severity": "CRITICAL", "event_type": "UNAUTHORIZED_COPY", "src": "/srv/finance/sensitive/payroll.csv", "dst": "/home/analyst/work/notes.txt", "dest_type": "LOCAL_DISK", "integrity": "PASS", "policy": "sensitive file sent to a destination not in approved_destinations"}, {"timestamp": "2026-10-13T09:04:00+00:00", "severity": "HIGH", "event_type": "SENSITIVE_FILE_MODIFIED", "src": "/srv/finance/sensitive/payroll.csv", "dst": null, "sha256_before": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7", "sha256_after": "9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c", "note": "content changed - possible tampering"}, {"timestamp": "2026-10-13T09:03:11+00:00", "severity": "CRITICAL", "event_type": "UNAUTHORIZED_COPY", "src": "/srv/finance/sensitive/customers.db", "dst": "/home/analyst/work/customers.db", "dest_type": "LOCAL_DISK", "integrity": "FAIL", "policy": "sensitive file sent to a destination not in approved_destinations"}, {"timestamp": "2026-10-13T09:03:10+00:00", "severity": "CRITICAL", "event_type": "INTEGRITY_FAILURE", "src": "/srv/finance/sensitive/customers.db", "dst": "/home/analyst/work/customers.db", "sha256_before": "e3d0c4e33d980688ffdf37e7a5070761be05bc3fdb3a1e0555256d7baf1992c9", "sha256_after": "9fe8a02876b3bcead00b6a97f06a6e9e0fbce787499f54cdd5642b05a800233c", "note": "hash mismatch after transfer - corrupted, truncated or tampered"}, {"timestamp": "2026-10-13T09:02:20+00:00", "severity": "CRITICAL", "event_type": "UNAUTHORIZED_COPY", "src": "/srv/finance/sensitive/payroll.csv", "dst": "/media/usb0/payroll.csv", "dest_type": "REMOVABLE_MEDIA", "sha256_before": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7", "sha256_after": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7", "integrity": "PASS", "policy": "sensitive file sent to a destination not in approved_destinations"}, {"timestamp": "2026-10-13T09:01:30+00:00", "severity": "INFO", "event_type": "AUTHORIZED_COPY", "src": "/srv/finance/sensitive/payroll.csv", "dst": "/srv/finance/approved/backup.csv", "sha256_before": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7", "sha256_after": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7", "integrity": "PASS"}, {"timestamp": "2026-10-13T09:00:45+00:00", "severity": "INFO", "event_type": "DOWNLOAD", "src": null, "dst": "/home/analyst/Downloads/report.pdf", "sha256": "e3d0c4e33d980688ffdf37e7a5070761be05bc3fdb3a1e0555256d7baf1992c9"}, {"timestamp": "2026-10-13T09:00:03+00:00", "severity": "INFO", "event_type": "MONITOR_STARTED", "src": null, "dst": null, "note": "press Ctrl+C to stop"}, {"timestamp": "2026-10-13T09:00:02+00:00", "severity": "INFO", "event_type": "WATCH_STARTED", "src": "/media/usb0", "dst": null}, {"timestamp": "2026-10-13T09:00:02+00:00", "severity": "INFO", "event_type": "WATCH_STARTED", "src": "/srv/finance/sensitive", "dst": null}, {"timestamp": "2026-10-13T09:00:01+00:00", "severity": "INFO", "event_type": "BASELINE_ADDED", "src": "/srv/finance/sensitive/customers.db", "dst": null, "sha256": "e3d0c4e33d980688ffdf37e7a5070761be05bc3fdb3a1e0555256d7baf1992c9"}, {"timestamp": "2026-10-13T09:00:00+00:00", "severity": "INFO", "event_type": "BASELINE_ADDED", "src": "/srv/finance/sensitive/payroll.csv", "dst": null, "sha256": "ea38e339b8a0c6c01754524cd52c52ea4d3861e6fd3ecd5c610baf1644a641b7"}], "total": 13};
+const token = new URLSearchParams(location.search).get('token') || '';
+const $ = id => document.getElementById(id);
+
+function cell(tr, text, cls) {                 // textContent only: filenames are untrusted input
+  const td = document.createElement('td');
+  td.textContent = text || '';
+  if (cls) td.className = cls;
+  tr.appendChild(td);
+  return td;
+}
+
+function render(data) {
+  const cards = $('cards'); cards.textContent = '';
+  for (const s of ['CRITICAL','HIGH','WARNING','INFO']) {
+    const d = document.createElement('div'); d.className = 'card';
+    const b = document.createElement('b'); b.className = s; b.textContent = data.counts[s] || 0;
+    d.appendChild(b); d.appendChild(document.createTextNode(s));
+    cards.appendChild(d);
+  }
+  const want = $('filter').value;
+  const rows = $('rows'); rows.textContent = '';
+  for (const e of data.events) {
+    if (want && e.severity !== want) continue;
+    const tr = document.createElement('tr');
+    if (e.severity === 'CRITICAL' || e.severity === 'HIGH') tr.className = 'alert';
+    cell(tr, (e.timestamp || '').replace('T',' ').slice(0,19), 'muted');
+    cell(tr, e.severity, 'sev ' + e.severity);
+    cell(tr, e.event_type);
+    cell(tr, e.src, 'path');
+    cell(tr, e.dst, 'path');
+    const skip = ['timestamp','severity','event_type','src','dst'];
+    const det = Object.entries(e).filter(([k,v]) => !skip.includes(k) && v)
+      .map(([k,v]) => k + ': ' + (k.startsWith('sha256') ? String(v).slice(0,16)+'...' : v)).join('\n');
+    const td = cell(tr, det, 'muted'); td.style.whiteSpace = 'pre-wrap';
+    rows.appendChild(tr);
+  }
+  $('status').textContent = 'updated ' + new Date().toLocaleTimeString() + ' - ' + data.total + ' events';
+}
+
+function refresh() { render(DATA); }
+$('filter').addEventListener('change', refresh);
+refresh();
+</script></body></html>
